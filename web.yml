@@ -1,0 +1,104 @@
+- name: Desplegar Apache con HTTP y HTTPS correctamente configurados
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Instalar Apache
+      apt:
+        name: 
+          - apache2
+          - php
+          - libapache2-mod-php
+        state: present
+        update_cache: yes
+
+    - name: Asegurar que Apache esté iniciado y habilitado
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Asegurar que el módulo SSL esté habilitado
+      command: a2enmod ssl
+      args:
+        creates: /etc/apache2/mods-enabled/ssl.load
+
+    - name: Crear carpeta http
+      file:
+        path: /var/www/http
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Crear carpeta https
+      file:
+        path: /var/www/https
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Descargar página de ejemplo desde example.com en /var/www/http
+      get_url:
+        url: https://example.com
+        dest: /var/www/http/index.html
+        mode: '0644'
+
+    - name: Descargar página de ejemplo desde example.com en /var/www/https
+      get_url:
+        url: https://example.com
+        dest: /var/www/https/index.html
+        mode: '0644'
+
+    - name: Crear archivo http.conf con configuración básica
+      copy:
+        dest: /etc/apache2/sites-available/http.conf
+        content: |
+          <VirtualHost *:80>
+              ServerName www.hospital.local
+              DocumentRoot /var/www/http
+              <Directory /var/www/http>
+                  Options Indexes FollowSymLinks
+                  AllowOverride None
+                  Require all granted
+              </Directory>
+              ErrorLog ${APACHE_LOG_DIR}/http_error.log
+              CustomLog ${APACHE_LOG_DIR}/http_access.log combined
+          </VirtualHost>
+
+    - name: Crear archivo https.conf con configuración básica
+      copy:
+        dest: /etc/apache2/sites-available/https.conf
+        content: |
+          <IfModule mod_ssl.c>
+            <VirtualHost *:443>
+                ServerName www.hospital.local
+                DocumentRoot /var/www/https
+                <Directory /var/www/https>
+                    Options Indexes FollowSymLinks
+                    AllowOverride None
+                    Require all granted
+                </Directory>
+                SSLEngine on
+                SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+                SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+                ErrorLog ${APACHE_LOG_DIR}/https_error.log
+                CustomLog ${APACHE_LOG_DIR}/https_access.log combined
+            </VirtualHost>
+          </IfModule>
+
+    - name: Habilitar sitio HTTP
+      command: a2ensite http.conf
+
+    - name: Habilitar sitio HTTPS
+      command: a2ensite https.conf
+
+    - name: Deshabilitar sitio por defecto
+      command: a2dissite 000-default.conf
+
+  handlers:
+    - name: Reiniciar Apache
+      systemd:
+        name: apache2
+        state: restarted

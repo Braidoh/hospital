@@ -1,0 +1,85 @@
+- name: Desplegar Pagina Web Hospital
+  hosts: website
+  become: yes
+  vars:
+    repo_url: "https://github.com/Braidoh/hospital.git"
+    db_ip: "10.0.2.3"
+    document_root: "/var/www/hospital"
+
+  tasks:
+    - name: Instalar Apache y módulos necesarios
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+          - git
+          - openssl
+        state: present
+        update_cache: yes
+
+    - name: Asegurar que el módulo SSL esté habilitado
+      apache2_module:
+        name: ssl
+        state: present
+
+    - name: Crear carpeta hospital en /var/www
+      file:
+        path: "{{ document_root }}"
+        state: directory
+        mode: '0755'
+
+    - name: Clonar el repositorio del hospital
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ document_root }}"
+        version: main
+        force: yes
+
+    - name: Eliminar archivos no .php
+      shell: find "{{ document_root }}" -type f ! -name "*.php" -delete
+
+    - name: Asegura que los archivos PHP usen la IP correcta de la base de datos
+      replace:
+        path: "{{ document_root }}/{{ item }}"
+        regexp: 'mysqli\("localhost",'
+        replace: 'mysqli("{{ db_ip }}",'
+      loop:
+        - admin.php
+        - doctor.php
+        - paciente.php
+        - visitante.php
+        - save.php
+        - session.php
+        - cita.php
+
+    - name: Configuración para HTTPS permanente
+      copy:
+        dest: /etc/apache2/sites-available/000-default.conf
+        content: |
+          <VirtualHost *:80>
+              ServerName www.hospital.local
+              Redirect permanent / https://www.hospital.local/
+          </VirtualHost>
+
+          <IfModule mod_ssl.c>
+            <VirtualHost *:443>
+                ServerName www.hospital.local
+                DocumentRoot {{ document_root }}
+                <Directory {{ document_root }}>
+                    Options Indexes FollowSymLinks
+                    AllowOverride All
+                    Require all granted
+                </Directory>
+                SSLEngine on
+                SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+                SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+                ErrorLog ${APACHE_LOG_DIR}/https_error.log
+                CustomLog ${APACHE_LOG_DIR}/https_access.log combined
+            </VirtualHost>
+          </IfModule>
+
+    - name: Reiniciar Apache y habilitar servicio
+      systemd:
+        name: apache2
+        enabled: yes
+        state: restarted

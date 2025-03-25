@@ -1,0 +1,81 @@
+- name: Instalar y configurar BIND9
+  hosts: bind
+  become: yes
+  tasks:
+    - name: Instalar bind9
+      apt:
+        name: bind9
+        state: present
+        update_cache: yes
+
+    - name: Iniciar y habilitar Bind9
+      systemd:
+        name: bind9
+        enabled: yes
+        state: started
+
+    - name: Instalar y configurar BIND9
+      hosts: bind
+      gather_facts: false
+      become: yes
+      tasks:
+        - name: Conf named.conf.local
+          copy:
+            dest: /etc/bind/named.conf.local
+            content: |
+              zone "servei.local" {
+                  type master;
+                  file "/etc/bind/db.servei.local";
+              };
+
+              zone "2.0.10.in-addr.arpa" {
+                  type master;
+                  file "/var/cache/bind/db.2.0.2";
+              };
+
+    - name: Crear archivo de zona directa
+      copy:
+        dest: /etc/bind/db.servei.local
+        owner: root
+        group: bind
+        mode: '0644'
+        content: |
+          $TTL 604800
+          @  IN  SOA  ada.servei.local. root.servei.local. (
+                 2          ; Serial
+                 604800     ; Refresh
+                 86400      ; Retry
+                 2419200    ; Expire
+                 604800 )   ; Negative Cache TTL
+          ;
+          @      IN  NS  ada.servei.local.
+          ada    IN  A   10.0.2.2
+          www    IN  A   10.0.2.2
+
+    - name: Crear archivo de zona inversa
+      copy:
+        dest: /etc/bind/db.10.0.2
+        owner: root
+        group: bind
+        mode: '0644'
+        content: |
+          $TTL  604800
+          @  IN  SOA  ada.servei.local.  root.servei.local (
+                 2            ; Serial
+                 604800       ; Refresh
+                 86400        ; Retry
+                 2419200      ; Expire
+                 604800 )     ; Negative Cache TTL
+          ;
+          @      IN  NS  ada.servei.local.
+          2    IN  NS  ada.servei.local.
+          2    IN  NS  www.servei.local.
+
+    - name: Habilitar y reiniciar el servicio BIND9
+      systemd:
+        name: bind9
+        enabled: yes
+        state: restarted
+
+        - php
+          - libapache2-mod-php

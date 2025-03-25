@@ -1,0 +1,30 @@
+- name: Configurar MySQL en la máquina database
+  hosts: database
+  become: yes
+
+  tasks:
+    - name: Instalar MySQL Server y Cliente
+      apt:
+        name: 
+          - mysql-server
+          - mysql-client
+        state: present
+        update_cache: yes
+
+    - name: Configurar MySQL para aceptar conexiones remotas
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
+
+    - name: Importar estructura de la base de datos directamente desde GitHub
+      shell: curl -s https://raw.githubusercontent.com/Braidoh/hospital/main/hospital.sql | mysql --user=root hospital
+
+    - name: Importar datos iniciales directamente desde GitHub
+      shell: curl -s https://raw.githubusercontent.com/Braidoh/hospital/main/inserts.sql | mysql --user=root hospital
+
+    - name: Reiniciar MySQL
+      systemd:
+        name: mysql
+        state: restarted

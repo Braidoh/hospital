@@ -101,12 +101,7 @@
     </div>
     <?php
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "hospital";
-
-            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn = new mysqli("localhost", "root", "", "hospital"); // Crea la conexión
             
             if ($conn->connect_error) {
                 die("<div class='resultado'>Conexión fallida: " . $conn->connect_error . "</div>");

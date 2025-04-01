@@ -45,6 +45,7 @@
         replace: 'mysqli("{{ db_ip }}",'
       loop:
         - admin.php
+        - blacklist.php
         - doctor.php
         - paciente.php
         - visitante.php

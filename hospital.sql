@@ -9,6 +9,8 @@ Doctor: id_persona (FK), pacientes (array de id_paciente), especialidad.
 Ficha Médica: id_ficha (PK), historial(FK), id_paciente (FK), doctor (id_doctor FK), fecha, diagnostico, tratamiento, observaciones.
 Historial: id_historial (PK), id_paciente (FK), grupo_sanguineo, alergias
 Cita: id_cita (PK), id_paciente (FK), id_doctor (FK), fecha (datetime), motivo, observaciones.
+Beeper: id (PK), receptor (FK), fecha (datetime), mensaje.
+Parking: id (PK), plaza (int), ocupada (boolean), matricula.
 */
 
 CREATE TABLE IF NOT EXISTS persona (
@@ -75,4 +77,18 @@ CREATE TABLE IF NOT EXISTS cita (
   observaciones TEXT,
   FOREIGN KEY (paciente) REFERENCES persona(id_persona),
   FOREIGN KEY (doctor) REFERENCES persona(id_persona)
+);
+
+CREATE TABLE IF NOT EXISTS beeper (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  receptor VARCHAR(3),
+  mensaje TEXT,
+  FOREIGN KEY (receptor) REFERENCES persona(id_persona)
+);
+
+CREATE TABLE IF NOT EXISTS parking (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  plaza INT,
+  ocupada BOOLEAN,
+  matricula_coche VARCHAR(20),
 );

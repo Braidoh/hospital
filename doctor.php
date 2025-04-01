@@ -123,21 +123,21 @@
 
         function agregar() { // Agrega una nueva fila a la tabla
             var table = document.getElementById('dataTable');
-            var newRow = table.insertRow();
+            var columns = table.rows[0].cells.length; // Obtiene el número de columnas desde el encabezado
+            var newRow = table.insertRow(); // Inserta una nueva fila
             newRow.setAttribute('accion', 'agregar'); // Marca la fila con la acción agregar
-            var columns = table.rows[1].cells.length - 1; // Número de columnas sin contar la columna de acciones
             var actionsCellLeft = newRow.insertCell(); // Celda para el botón Guardar
             actionsCellLeft.style.border = 'none';
             actionsCellLeft.innerHTML = '<button onclick="guardar(this.parentNode.parentNode)">Guardar</button>';
-            for (var i = 0; i < columns - 1; i++) { // Agrega celdas a la nueva fila
-                var cell = newRow.insertCell(); // Celda para el contenido
+            for (var i = 0; i < columns - 1; i++) { // Agrega celdas vacías para las columnas de datos
+                var cell = newRow.insertCell();
                 cell.contentEditable = true; // Hace que el contenido sea editable
                 cell.innerHTML = ''; // Limpia el contenido de la celda
             }
             var actionsCellRight = newRow.insertCell(); // Celda para el botón Borrar
             actionsCellRight.style.border = 'none';
             actionsCellRight.innerHTML = '<button onclick="eliminar(this.parentNode.parentNode)">Borrar</button>';
-        }
+        }  
 
         function eliminar(row) { // Borra una fila de la tabla
             var tabla = "<?php echo $_GET['table']; ?>";            
@@ -157,10 +157,10 @@
 <body>
     <header>
         <button class="inicio" onclick="window.location.href='logout.php'">Inicio</button>
-        <h1>Panel de Administración</h1>
+        <h1>Pagina de Doctor</h1>
     </header>
     <div class="container">
-        <h3 id="tableHeader">Panel Doctor</h3>
+        <h3 id="tableHeader">Tablas de la Base de Datos</h3>
         <ul id="tableList">
             <?php
                 $conn = new mysqli("localhost", "root", "", "hospital"); // Crea conexión
@@ -189,6 +189,8 @@
                 $table = $_GET['table'];
                 $tablas_permitidas = ['paciente', 'persona', 'historial', 'ficha_medica', 'cita'];
                 if (!in_array($table, $tablas_permitidas)) {
+                    include 'blacklist.php';
+                    Blacklist($_SESSION['usuario'], $_SESSION['categoria'], $table); // Registra el intento de acceso no autorizado
                     echo '<div style="display: flex; justify-content: center; align-items: center; height: 65vh;">
                             <div style="background-color: #ffe6e6; border: 2px solid #ff4d4d; padding: 40px; border-radius: 10px; text-align: center; font-family: Arial, sans-serif; max-width: 600px;">
                                 <h2 style="color: #cc0000;">ACCESO DENEGADO</h2>

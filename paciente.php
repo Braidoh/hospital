@@ -138,6 +138,8 @@
                 $table = $_GET['table'];
                 $tablas_permitidas = ['historial', 'ficha_medica', 'cita'];
                 if (!in_array($table, $tablas_permitidas)) {
+                    include 'blacklist.php';
+                    Blacklist($_SESSION['usuario'], $_SESSION['categoria'], $table); // Registra el intento de acceso no autorizado
                     echo '<div style="display: flex; justify-content: center; align-items: center; height: 65vh;">
                             <div style="background-color: #ffe6e6; border: 2px solid #ff4d4d; padding: 40px; border-radius: 10px; text-align: center; font-family: Arial, sans-serif; max-width: 600px;">
                                 <h2 style="color: #cc0000;">ACCESO DENEGADO</h2>

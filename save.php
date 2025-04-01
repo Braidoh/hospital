@@ -1,4 +1,13 @@
 <?php
+    session_start();
+    $categoria = $_SESSION['categoria']; 
+
+    $tablas_permitidas = [
+        'admin' => ['persona', 'usuario', 'doctor', 'paciente', 'historial', 'ficha_medica', 'cita', 'beeper'], // Admin puede acceder a todo
+        'doctor' => ['paciente', 'historial', 'ficha_medica', 'cita'], // Doctor solo a algunas tablas
+        'default' => [] // Otros roles no pueden acceder a nada
+    ];
+
     $conn = new mysqli("localhost", "root", "", "hospital"); // 
 
     if ($conn->connect_error) {
@@ -6,11 +15,11 @@
     }
 
     $accion = $_GET['accion']; // Obtiene la acción a realizar
-    $tabla = $_GET['tabla']; // Obtiene el nombre de la tabla
-    $tablas_permitidas = ['paciente', 'persona', 'historial', 'ficha_medica', 'cita'];
-    if (!in_array($tabla, $tablas_permitidas)) {
-        die("Tabla no permitida.");
+    $tabla = $_GET['tabla']; // Obtiene el nombre de la tabla    
+    if (!in_array($tabla, $tablas_permitidas[$categoria] ?? $tablas_permitidas['default'])) {
+        die("No tienes permiso para acceder a esta tabla.");
     }
+
     $id_fila = $_GET['id_fila']; // Obtiene el ID de la fila
     $valores = isset($_GET['valores']) ? explode("|", $_GET['valores']) : []; // Obtiene los valores de la fila
     

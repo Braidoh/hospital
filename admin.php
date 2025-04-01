@@ -122,22 +122,22 @@
 
         function agregar() { // Agrega una nueva fila a la tabla
             var table = document.getElementById('dataTable');
-            var newRow = table.insertRow();
+            var columns = table.rows[0].cells.length; // Obtiene el número de columnas desde el encabezado
+            var newRow = table.insertRow(); // Inserta una nueva fila
             newRow.setAttribute('accion', 'agregar'); // Marca la fila con la acción agregar
-            var columns = table.rows[1].cells.length - 1; // Número de columnas sin contar la columna de acciones
             var actionsCellLeft = newRow.insertCell(); // Celda para el botón Guardar
             actionsCellLeft.style.border = 'none';
             actionsCellLeft.innerHTML = '<button onclick="guardar(this.parentNode.parentNode)">Guardar</button>';
-            for (var i = 0; i < columns - 1; i++) { // Agrega celdas a la nueva fila
-                var cell = newRow.insertCell(); // Celda para el contenido
+            for (var i = 0; i < columns - 1; i++) { // Agrega celdas vacías para las columnas de datos
+                var cell = newRow.insertCell();
                 cell.contentEditable = true; // Hace que el contenido sea editable
                 cell.innerHTML = ''; // Limpia el contenido de la celda
             }
             var actionsCellRight = newRow.insertCell(); // Celda para el botón Borrar
             actionsCellRight.style.border = 'none';
             actionsCellRight.innerHTML = '<button onclick="eliminar(this.parentNode.parentNode)">Borrar</button>';
-        }
-
+        }        
+        
         function eliminar(row) { // Borra una fila de la tabla
             var tabla = "<?php echo $_GET['table']; ?>";            
             var id_fila = row.cells[1].innerText; // Obtiene el índice de la fila

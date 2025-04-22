@@ -10,23 +10,33 @@ Cita: id_cita (PK), id_paciente (FK), id_doctor (FK), fecha (datetime), motivo, 
 
 USE hospital;
 
-INSERT INTO persona VALUES (NULL, '12345678A', 'Usuario', 'Test', 'Admin', '2000-01-01', 'FalsitoLandia', 'admin@gmail.com');
+INSERT INTO persona VALUES (1, '12345678A', 'Usuario', 'Test', 'Admin', '2000-01-01', 'Oleopolis', 'admin@gmail.com');
 INSERT INTO usuario VALUES (1, 'admin', '1234', 'admin');
-INSERT INTO persona VALUES (NULL, '12345678A', 'Usuario', 'Test', 'Admin', '2000-01-01', 'FalsitoLandia', 'admin@gmail.com');
+INSERT INTO usuario VALUES (1, 'doctor', '1234', 'doctor');
+INSERT INTO usuario VALUES (1, 'paciente', '1234', 'paciente');
 
+INSERT INTO persona VALUES (2, '12345678B', 'Pepe', 'Albares', 'Doctor', '2000-01-01', 'Fariopolis', 'pepealbares@gmail.com');
+INSERT INTO usuario VALUES (2, 'goldman', '1234', 'doctor');
 
-INSERT INTO usuario VALUES (LAST_INSERT_ID(), 'test', 'test', 'guest');
+INSERT INTO persona VALUES (3, '12345678C', 'Marta', 'Penelope', 'Paciente', '2000-01-01', 'Caleopolis', 'martapenelope@gmail.com');
+INSERT INTO usuario VALUES (3, 'aries', '1234', 'paciente');
 
-INSERT INTO paciente VALUES (1, '122333', NULL, 0, NULL, NULL);
-INSERT INTO paciente VALUES (2, '122333', NULL, 1, 'ala_norte', NULL);
+INSERT INTO persona VALUES (4, '12345678D', 'Juan', 'Lopez', 'Paciente', '2000-01-01', 'Poliopolis', 'juanlopez@gmail.com');
 
-INSERT INTO historial VALUES (NULL, LAST_INSERT_ID(), 'A', 'Ninguna');
+INSERT INTO paciente VALUES (1, '122333', NULL, 'si', 'habitacion_0', NULL);
+INSERT INTO paciente VALUES (2, '123456', NULL, 'no', NULL, NULL);
+INSERT INTO paciente VALUES (3, '313131', NULL, 'si', 'habitacion_1', NULL);
 
-INSERT INTO ficha_medica VALUES (NULL, LAST_INSERT_ID(), LAST_INSERT_ID(), NULL, '2000-01-01', NULL, NULL, NULL);
+INSERT INTO historial VALUES (1,'A', 'Ninguna');
+INSERT INTO historial VALUES (2,'B', 'Frutos secos');
+INSERT INTO historial VALUES (3,'O', 'Ninguna');
 
-INSERT INTO cita VALUES (NULL, LAST_INSERT_ID(), 1, '2000-01-01', 'Test', NULL);
+INSERT INTO ficha_medica VALUES (1, 1, 2, '2000-01-01', 'Trauma craneal', 'Cirugia', 'El paciente presenta un fuerte dolor de cabeza.');
+INSERT INTO ficha_medica VALUES (2, 2, 1, '2000-01-02', 'Cáncer de páncreas', 'Quimioterapia', 'El paciente presenta un fuerte dolor de estomago.');
+INSERT INTO ficha_medica VALUES (3, 3, 2, '2000-01-03', 'Femur roto', 'Escayola', NULL);
+INSERT INTO ficha_medica VALUES (3, 4, 2, '2000-01-04', 'Insuficiencia renal crónica', 'Diálisis, control de dieta y medicación antihipertensiva', 'El paciente requiere seguimiento mensual y evaluación para trasplante renal.');
 
-INSERT INTO doctor VALUES (LAST_INSERT_ID(), 'Nothing');
-
-UPDATE usuario SET categoria = 'admin' WHERE id_persona = 1;
-
+INSERT INTO cita VALUES (1, 1, 2, '2000-01-01', 'Dolor de cabeza', 'El paciente presenta un fuerte dolor de cabeza.');
+INSERT INTO cita VALUES (2, 2, 1, '2000-01-02', 'Dolor de estomago', 'El paciente presenta un fuerte dolor de estomago.');
+INSERT INTO cita VALUES (3, 3, 2, '2000-01-03', 'Laringitis', 'El paciente presenta un fuerte dolor de garganta.');
+INSERT INTO cita VALUES (4, 4, 2, '2000-01-04', 'Fiebre', 'El paciente presenta fiebre.');

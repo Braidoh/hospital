@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS paciente (
   id_persona INT,
   NSS VARCHAR(20),
   doctor INT,
-  estado_ingresado BOOLEAN,
+  estado_ingresado VARCHAR(2),
   ubicacion VARCHAR(100),
   familiares TEXT,
   FOREIGN KEY (id_persona) REFERENCES persona(id_persona) ON DELETE CASCADE,

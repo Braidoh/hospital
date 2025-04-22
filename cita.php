@@ -98,7 +98,7 @@
 </html>
 
 <?php
-    $conn = new mysqli("localhost", "root", "", "hospital"); // Crea la conexión
+    $conn = new mysqli("10.0.2.2", "root", "", "hospital"); // Crea la conexión
 
     if ($conn->connect_error) { // Verifica la conexión
         die("Conexión fallida: " . $conn->connect_error);

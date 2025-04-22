@@ -163,7 +163,7 @@
         <h3 id="tableHeader">Tablas de la Base de Datos</h3>
         <ul id="tableList">
             <?php
-                $conn = new mysqli("localhost", "root", "", "hospital"); // Crea conexión
+                $conn = new mysqli("10.0.2.2", "root", "", "hospital"); // Crea conexión
                 
                 if ($conn->connect_error) { // Verifica la conexión
                     die("Conexión fallida: " . $conn->connect_error);

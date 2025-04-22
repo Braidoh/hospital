@@ -8,7 +8,7 @@
         'default' => [] // Otros roles no pueden acceder a nada
     ];
 
-    $conn = new mysqli("localhost", "root", "", "hospital"); // 
+    $conn = new mysqli("10.0.2.2", "root", "", "hospital"); // 
 
     if ($conn->connect_error) {
         die("Conexión fallida: " . $conn->connect_error);

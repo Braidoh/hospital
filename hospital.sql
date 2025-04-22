@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS cita (
   FOREIGN KEY (doctor) REFERENCES persona(id_persona)
 );
 
-CREATE TABLE IF NOT EXISTS beeper (
+CREATE TABLE IF NOT EXISTS buscapersonas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   receptor VARCHAR(3),
   mensaje TEXT,

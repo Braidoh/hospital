@@ -156,6 +156,7 @@
 <body>
     <header>
         <button class="inicio" onclick="window.location.href='logout.php'">Inicio</button>
+        <button class="inicio" onclick="window.location.href='parking.php'">Parking</button> 
         <h1>Panel de Administración</h1>
     </header>
     <div class="container">

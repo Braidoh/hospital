@@ -1,52 +1,3 @@
-<?php
-// Parámetros de conexión a la base de datos
-$servidor = "localhost";  // Dirección IP o localhost del servidor de base de datos
-$usuario = "root";        // Usuario de la base de datos
-$contrasena = "1234";     // Contraseña de la base de datos
-$base_de_datos = "hospital";  // Nombre de la base de datos
-
-// Conectar con la base de datos
-$conn = new mysqli($servidor, $usuario, $contrasena, $base_de_datos);
-
-// Verificar si la conexión fue exitosa
-if ($conn->connect_error) {
-    die("Error de conexión: " . $conn->connect_error);
-}
-
-// Función para insertar o actualizar la base de datos
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $plaza = $_POST['plaza'];
-    $estado = $_POST['estado'];
-    $matricula = $_POST['matricula'];
-    $fecha_ocupacion = date("Y-m-d H:i:s");  // Fecha y hora actual
-    $fecha_liberacion = null;  // Inicialmente no hay liberación, solo si la plaza se libera
-
-    // Prevenir ataques de inyección SQL (sanitización de datos)
-    $plaza = $conn->real_escape_string($plaza);
-    $estado = $conn->real_escape_string($estado);
-    $matricula = $conn->real_escape_string($matricula);
-
-    if ($estado == "1") {
-        // Si la plaza está ocupada, insertamos o actualizamos la fecha de ocupación
-        $sql = "INSERT INTO ocupaciones_parking (plaza_id, matricula, fecha_ocupacion, fecha_liberacion) 
-                VALUES ('$plaza', '$matricula', '$fecha_ocupacion', '$fecha_liberacion')";
-    } else {
-        // Si la plaza está libre, actualizamos la fecha de liberación
-        $fecha_liberacion = date("Y-m-d H:i:s"); // Fecha de liberación actual
-        $sql = "UPDATE ocupaciones_parking 
-                SET fecha_liberacion = '$fecha_liberacion', matricula = 'Desconocida'
-                WHERE plaza_id = '$plaza' AND fecha_liberacion IS NULL";
-    }
-
-    // Ejecutar la consulta y verificar si fue exitosa
-    if ($conn->query($sql) === TRUE) {
-        echo "Datos registrados correctamente";
-    } else {
-        echo "Error al registrar los datos: " . $conn->error;
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -181,3 +132,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   </script>
 </body>
 </html>
+<?php
+    $conn = new mysqli("10.0.2.2", "root", "1234", "hospital");
+    
+    if ($conn->connect_error) {
+        die("Error de conexión: " . $conn->connect_error);
+    }
+    
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') { // Función para insertar o actualizar la base de datos
+        $plaza = $_POST['plaza'];
+        $estado = $_POST['estado'];
+        $matricula = $_POST['matricula'];
+        $fecha_ocupacion = date("Y-m-d H:i:s");  // Fecha y hora actual
+        $fecha_liberacion = null;  // Inicialmente no hay liberación, solo si la plaza se libera
+    
+        // Prevenir ataques de inyección SQL (sanitización de datos)
+        $plaza = $conn->real_escape_string($plaza);
+        $estado = $conn->real_escape_string($estado);
+        $matricula = $conn->real_escape_string($matricula);
+    
+        if ($estado == "1") {
+            // Si la plaza está ocupada, insertamos o actualizamos la fecha de ocupación
+            $sql = "INSERT INTO ocupaciones_parking (plaza_id, matricula, fecha_ocupacion, fecha_liberacion) 
+                    VALUES ('$plaza', '$matricula', '$fecha_ocupacion', '$fecha_liberacion')";
+        } else {
+            // Si la plaza está libre, actualizamos la fecha de liberación
+            $fecha_liberacion = date("Y-m-d H:i:s"); // Fecha de liberación actual
+            $sql = "UPDATE ocupaciones_parking 
+                    SET fecha_liberacion = '$fecha_liberacion', matricula = 'Desconocida'
+                    WHERE plaza_id = '$plaza' AND fecha_liberacion IS NULL";
+        }
+        
+        if ($conn->query($sql) === TRUE) { // Ejecutar la consulta y verificar si fue exitosa
+            echo "Datos registrados correctamente";
+        } else {
+            echo "Error al registrar los datos: " . $conn->error;
+        }
+    }
+?>

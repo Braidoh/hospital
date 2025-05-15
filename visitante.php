@@ -116,7 +116,7 @@
             
             if ($result->num_rows > 0) { // Si hay resultados
                 while ($row = $result->fetch_assoc()) // Obtener la fila de resultados
-                if ($row['estado_ingresado'] == 1) { // Si el paciente está ingresado
+                if ($row['estado_ingresado'] == 'si') { // Si el paciente está ingresado
                     echo "<div class='resultado'>Estado del paciente: ingresado <br> Ubicación: " . $row['ubicacion'] . "</div>";
                 } else { // Si el paciente no está ingresado
                     echo "<div class='resultado'>Estado del paciente: no ingresado</div>";

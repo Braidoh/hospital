@@ -1,65 +1,67 @@
 <?php
-require('phpMQTT.php'); // Asegúrate de tener esta librería en tu directorio
+require("phpMQTT.php"); // Asegúrate de tener esta clase disponible
 
-$server = 'localhost';  // IP o hostname del broker
-$port = 1883;           // Puerto MQTT
-$username = '';         // Si tienes autenticación
-$password = '';
-$client_id = 'php-mqtt-listener';
+$server = "10.0.1.5";
+$port = 1883;
+$username = ""; // si aplica
+$password = "";
+$client_id = "phpMQTT-listener";
 
 $mqtt = new phpMQTT($server, $port, $client_id);
 
-if (!$mqtt->connect(true, NULL, $username, $password)) {
+if(!$mqtt->connect(true, NULL, $username, $password)) {
     exit("No se pudo conectar al broker MQTT\n");
 }
 
-$topics = [
-    'parking/plaza1' => ['qos' => 0, 'function' => 'procesarMensaje'],
-    'parking/plaza2' => ['qos' => 0, 'function' => 'procesarMensaje']
-];
+for ($i = 1; $i <= 12; $i++) {
+    $mqtt->subscribe(["parking/plaza$i" => ["qos" => 0, "function" => "procesarMensaje"]]);
+}
 
-$mqtt->subscribe($topics, 0);
-
-while ($mqtt->proc()) {}
+while($mqtt->proc()) {}
 
 $mqtt->close();
 
 function procesarMensaje($topic, $msg) {
-    $plaza = explode('parking/plaza', $topic)[1];
-    $estado = trim($msg);
-    $matricula = ($estado === "1") ? generarMatricula() : 'Desconocida';
+    if (preg_match('/plaza(\d+)/', $topic, $match)) {
+        $plaza = intval($match[1]);
+        $estado = trim($msg); // "1" o "0"
 
-    $fecha_ocupacion = date("Y-m-d H:i:s");
-    $fecha_liberacion = ($estado === "0") ? $fecha_ocupacion : null;
+        $conn = new mysqli("localhost", "root", "1234", "hospital");
+        if ($conn->connect_error) {
+            echo "Error DB: " . $conn->connect_error . "\n";
+            return;
+        }
 
-    $conn = new mysqli("localhost", "root", "1234", "hospital");
-    if ($conn->connect_error) {
-        error_log("DB Error: " . $conn->connect_error);
-        return;
+        $plaza = $conn->real_escape_string($plaza);
+        $matricula = ($estado === "1") ? generarMatricula() : "Desconocida";
+
+        if ($estado === "1") {
+            // Plaza ocupada
+            $fecha_ocupacion = date("Y-m-d H:i:s");
+            $sql = "INSERT INTO ocupaciones_parking (plaza_id, matricula, fecha_ocupacion, fecha_liberacion)
+                    VALUES ('$plaza', '$matricula', '$fecha_ocupacion', NULL)";
+        } else {
+            // Plaza liberada
+            $fecha_liberacion = date("Y-m-d H:i:s");
+            $sql = "UPDATE ocupaciones_parking 
+                    SET fecha_liberacion = '$fecha_liberacion', matricula = 'Desconocida'
+                    WHERE plaza_id = '$plaza' AND fecha_liberacion IS NULL";
+        }
+
+        if ($conn->query($sql) === TRUE) {
+            echo "Plaza $plaza actualizada: estado=$estado\n";
+        } else {
+            echo "Error en plaza $plaza: " . $conn->error . "\n";
+        }
+
+        $conn->close();
     }
-
-    if ($estado === "1") {
-        $stmt = $conn->prepare("INSERT INTO ocupaciones_parking (plaza_id, matricula, fecha_ocupacion, fecha_liberacion) VALUES (?, ?, ?, NULL)");
-        $stmt->bind_param("sss", $plaza, $matricula, $fecha_ocupacion);
-    } else {
-        $stmt = $conn->prepare("UPDATE ocupaciones_parking SET fecha_liberacion = ?, matricula = 'Desconocida' WHERE plaza_id = ? AND fecha_liberacion IS NULL");
-        $stmt->bind_param("ss", $fecha_liberacion, $plaza);
-    }
-
-    $stmt->execute();
-    $stmt->close();
-    $conn->close();
 }
 
 function generarMatricula() {
     $letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     $numeros = "0123456789";
-    $matricula = "";
-    for ($i = 0; $i < 4; $i++) $matricula .= $letras[rand(0, 25)];
-    for ($i = 0; $i < 4; $i++) $matricula .= $numeros[rand(0, 9)];
-    return $matricula;
+    return substr(str_shuffle($letras), 0, 4) . substr(str_shuffle($numeros), 0, 4);
 }
-?>
-
 
 
